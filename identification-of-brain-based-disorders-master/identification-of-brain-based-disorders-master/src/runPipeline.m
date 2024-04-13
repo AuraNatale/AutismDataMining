@@ -29,11 +29,11 @@
 
 function [bestScore, bestLabel, bestFeature] = ...
     runPipeline(method_name, input_data, reference_label)
-if nargin < 3
+if nargin < 3  %check if the quantity of arguments passed is 3, if not chose default reference label
     reference_label = [];
 end
 
-numFeature = size(input_data, 2);
+numFeature = size(input_data, 2); %to know how many feature the matrix has
 %% Parameter Setting
 % MaxNumClust: maximum number of clusters
 % MaxIteration: maximum number of iterations
@@ -43,14 +43,14 @@ numFeature = size(input_data, 2);
 % goodSolution: percentage of top solutions that will be selected into next
 % generation
 % givenPotentialSolution: if true load from file, else randomly generate
-MaxNumClust = 5;
+MaxNumClust = 5; 
 MaxIteration = 1000;
 MaxPercentFeature = 0.5;
 popSize = 400;
 pm = .3;
 goodSolution = .2;
 givenPotentialSolution = false;
-rng('shuffle')
+rng('shuffle') %seed for the random generation based on current time
 
 %% Initialize
 pop = InitialPop(numFeature, popSize, MaxPercentFeature, givenPotentialSolution);

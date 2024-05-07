@@ -1,3 +1,4 @@
+import pandas as pd
 
 '''
 We decide that to fill the missing values of the test subministred
@@ -6,7 +7,11 @@ of the population (if the statistics are available in the literature),
 otherwise we will use the mean extracted from our dataset.
  '''
 
-def test_score_fill (feature_name, feature_data):
+#How to use the function:
+#result = df['A'].apply(custom_function, args=(multiplier,))
+# dataset[feature_name] = dataset[feature_name].apply(test_score_fill, args=(feature_name, feature_mean))
+# dataset[feature_name] = dataset[feature_name].apply(lambda x: test_score_fill(feature_name, x))
+def test_score_fill (feature_value, feature_name, feature_mean):
     # We create a dictionary to store the literature mean scores
     literature_scores = {
     "FIQ": 97.34, #retrieved from 
@@ -22,23 +27,14 @@ def test_score_fill (feature_name, feature_data):
 
     # Then we check which feature we obtained to decide if replace
     # using the value in the dictionary ot directly the mean of the data
+    if pd.isna(feature_value):
+
+        if feature_name in literature_scores:
+            return literature_scores[feature_name]
+        else:
+            return feature_mean
+    else:
+
+        return feature_value
     
-
-# Lista delle coppie di features da controllare
-feature_pairs = [
-    ('FIQ_TEST_TYPE', 'FIQ'),
-    ('PIQ_TEST_TYPE', 'PIQ'),
-    ('VIQ_TEST_TYPE', 'VIQ')]
-
-# Iteriamo su ogni coppia di features
-for test_type_col, score_col in feature_pairs:
-    # Iteriamo su ogni riga del DataFrame
-    for index, row in ASD_phenotypic_filtered.iterrows():
-        # Controlliamo se il valore nella colonna 'test_type_col' è mancante
-        if pd.isnull(row[test_type_col]):
-            # Se il valore nella colonna 'score_col' è presente
-            if not pd.isnull(row[score_col]):
-                # Calcoliamo la moda di 'test_type_col'
-                mode_test_type = ASD_phenotypic_filtered[test_type_col].mode()[0]
-                # Sostituiamo il valore mancante nella colonna 'test_type_col' con la moda
-                ASD_phenotypic_filtered.at[index, test_type_col] = mode_test_type
+   

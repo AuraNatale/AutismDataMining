@@ -1,6 +1,10 @@
 
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
+from scipy.stats import chi2_contingency
+import numpy as np
+import pandas as pd
+
 
 '''The function select_columns(df) is useful for selecting and distinguishing
 numerical features and categorical ones. In order to use it the framework is:
@@ -79,6 +83,23 @@ def plot_features_by_presence(columns_by_presence, numeric_columns, legend):
     # Se la legenda non è richiesta, non mostrare la legenda
     if not legend:
         plt.legend().remove()
+
+
+'''This fucntion is used to compute the correlation between categorical variables using the cramers
+
+extracted from chatgpt ujuju '''
+
+def cramers_v(x, y):
+    """Compute Cramer's V statistic for categorical-categorical association."""
+    confusion_matrix = pd.crosstab(x, y)
+    chi2, _, _, _ = chi2_contingency(confusion_matrix)
+    n = confusion_matrix.sum().sum()
+    phi2 = chi2 / n
+    r, k = confusion_matrix.shape
+    phi2corr = max(0, phi2 - ((k - 1) * (r - 1)) / (n - 1))
+    rcorr = r - ((r - 1) ** 2) / (n - 1)
+    kcorr = k - ((k - 1) ** 2) / (n - 1)
+    return np.sqrt(phi2corr / min((kcorr - 1), (rcorr - 1)))
 
     
 

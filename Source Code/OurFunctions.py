@@ -93,13 +93,13 @@ def cramers_v(x, y):
     """Compute Cramer's V statistic for categorical-categorical association."""
     confusion_matrix = pd.crosstab(x, y)
     chi2, _, _, _ = chi2_contingency(confusion_matrix)
-    n = confusion_matrix.sum().sum()
-    phi2 = chi2 / n
-    r, k = confusion_matrix.shape
-    phi2corr = max(0, phi2 - ((k - 1) * (r - 1)) / (n - 1))
-    rcorr = r - ((r - 1) ** 2) / (n - 1)
-    kcorr = k - ((k - 1) ** 2) / (n - 1)
-    return np.sqrt(phi2corr / min((kcorr - 1), (rcorr - 1)))
+    total_elements = confusion_matrix.sum().sum()
+    phi2 = chi2 / total_elements
+    raws, columns = confusion_matrix.shape
+    phi2corr = max(0, phi2 - ((columns - 1) * (raws - 1)) / (total_elements - 1))
+    raws_corr = raws - ((raws - 1) ** 2) / (total_elements - 1)
+    columns_corr = columns - ((columns - 1) ** 2) / (total_elements - 1)
+    return np.sqrt(phi2corr / min((columns_corr - 1), (raws_corr - 1)))
 
     
 

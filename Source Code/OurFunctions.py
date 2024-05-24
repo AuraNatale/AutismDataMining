@@ -43,8 +43,9 @@ def plot_missing_values(columns_with_nan_sorted, numeric_columns, legend):
     plt.figure(figsize=(12, 16))
     columns_with_nan_sorted.plot(kind='barh', color=colors)
     plt.title('Features with Missing Values')
-    plt.xlabel('Number of Missing Values')
+    plt.xlabel('Percentage of Missing Values [%]')
     plt.ylabel('Features')
+    plt.xticks(range(0, 110, 10))
 
 
     # Aggiungi legenda
@@ -104,3 +105,35 @@ def cramers_v(x, y):
     
 
 
+def calculate_missing_percentage(df):
+    total_values = df.size
+    missing_values = df.isna().sum().sum()
+    return (missing_values / total_values) * 100
+
+
+def remove_high_missing(df, threshold=10):
+    current_df = df.copy()
+    
+    while calculate_missing_percentage(current_df) > threshold:
+        # Calcola la percentuale di valori mancanti per ciascuna colonna e riga
+        missing_percent_features = current_df.isna().mean() * 100
+        missing_percent_subjects = current_df.isna().mean(axis=1) * 100
+        
+        # Trova la feature o il soggetto con il più alto tasso di missing values
+        max_feature_missing = missing_percent_features.max()
+        max_subject_missing = missing_percent_subjects.max()
+        
+        # Rimuovi la feature o il soggetto con il tasso di missing values più alto
+        if max_feature_missing >= max_subject_missing:
+            feature_to_drop = missing_percent_features.idxmax()
+            current_df = current_df.drop(columns=[feature_to_drop])
+            print(f"Rimosso feature: {feature_to_drop}")
+        else:
+            subject_to_drop = missing_percent_subjects.idxmax()
+            current_df = current_df.drop(index=[subject_to_drop])
+            print(f"Rimosso soggetto: {subject_to_drop}")
+        
+        # Controllo dello stato attuale del DataFrame
+        print(f"Percentuale attuale di missing values: {calculate_missing_percentage(current_df):.2f}%")
+    
+    return current_df

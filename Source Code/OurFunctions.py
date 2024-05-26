@@ -4,6 +4,7 @@ import matplotlib.patches as mpatches
 from scipy.stats import chi2_contingency
 import numpy as np
 import pandas as pd
+from sklearn.preprocessing import MinMaxScaler
 
 
 '''The function select_columns(df) is useful for selecting and distinguishing
@@ -289,6 +290,19 @@ def inpute_missing_values (dataset, dataset_original):
         dataset[feature_name] = dataset[feature_name].apply(test_score_fill, args=(feature_name, feature_mean))
 
     return dataset
+
+
+''' This function normalizes to a range [0-1] the numerical features'''
+def normalization (dataset):
+    numeric = dataset.select_dtypes(include=['float64', 'int64']).dropna()
+    scaler = MinMaxScaler()
+    numeric_normalized = pd.DataFrame(scaler.fit_transform(numeric), columns=numeric.columns)
+
+    dataset_normalized= dataset.copy()
+    dataset_normalized[numeric_normalized.columns] = numeric_normalized
+
+    return dataset_normalized
+
 
 
         

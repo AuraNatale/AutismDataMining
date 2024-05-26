@@ -294,15 +294,35 @@ def inpute_missing_values (dataset, dataset_original):
 
 ''' This function normalizes to a range [0-1] the numerical features'''
 def normalization (dataset):
-    numeric = dataset.select_dtypes(include=['float64', 'int64']).dropna()
-    scaler = MinMaxScaler()
-    numeric_normalized = pd.DataFrame(scaler.fit_transform(numeric), columns=numeric.columns)
+    numeric_columns = dataset.select_dtypes(include=['float64', 'int64']).columns
+    numeric_columns_names = numeric_columns.tolist()
 
-    dataset_normalized= dataset.copy()
-    dataset_normalized[numeric_normalized.columns] = numeric_normalized
+    for column in numeric_columns_names:
+        min = dataset[column].min()
+        max = dataset[column].max()
 
-    return dataset_normalized
+        for i in dataset.index:
+            current_value = dataset[column][i]
+            dataset.loc[i, column] = (current_value - min) / (max - min)
+
+    return dataset
 
 
+# Example usage
+# dataset = pd.read_csv('your_dataset.csv')
+# normalized_dataset = normalization(dataset)
+
+
+''' This function returns a version of the dataset where the categorical features
+where encoded to numerical using one hot encoding'''
+
+def One_hot_encoding (dataset):
+    numeric_columns, categorical_columns, dataset = select_columns(dataset)
+    categorical_column_names = categorical_columns.tolist()
+    
+    for categorical_feature in categorical_column_names:
+        dataset = pd.get_dummies(dataset, columns=[categorical_feature])
+
+    return dataset
 
         

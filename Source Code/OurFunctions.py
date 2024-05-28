@@ -4,6 +4,7 @@ import matplotlib.patches as mpatches
 from scipy.stats import chi2_contingency
 import numpy as np
 import pandas as pd
+import seaborn as sns
 from sklearn.preprocessing import MinMaxScaler
 
 
@@ -64,7 +65,7 @@ def plot_missing_values(columns_with_nan_sorted, numeric_columns, legend):
 '''stavolta riferito al numero di valori presenti
 Utilizzo della funzione
 plot_features_by_presence(columns_by_presence, numeric_columns)'''
-
+'''
 def plot_features_by_presence(columns_by_presence, numeric_columns, legend):
     # Assegna colori alle colonne
     colors = ['blue' if col in numeric_columns else 'orange' for col in columns_by_presence.index]
@@ -86,6 +87,40 @@ def plot_features_by_presence(columns_by_presence, numeric_columns, legend):
     if not legend:
         plt.legend().remove()
 
+    '''
+
+
+# Funzione per calcolare il conteggio delle classi per DX_GROUP
+def evaluate_balancing(df):
+    class_counts_DX_GROUP = df['DX_GROUP'].value_counts()
+
+
+    # Stampa il conteggio delle classi per DX_GROUP
+    print("Conteggio delle classi per DX_GROUP:")
+    print(class_counts_DX_GROUP)
+
+    # Visualizza la distribuzione delle classi per DX_GROUP
+    class_counts_DX_GROUP.plot(kind='bar', color='blue')
+    plt.title('Distribuzione delle classi per DX_GROUP')
+    plt.xlabel('Classe')
+    plt.ylabel('Numero di campioni')
+    plt.xticks(rotation=0)
+    plt.show()
+
+    # Calcola le proporzioni delle classi per DX_GROUP
+    class_proportions_DX_GROUP = df['DX_GROUP'].value_counts(normalize=True)
+
+    # Stampa le proporzioni delle classi per DX_GROUP
+    print("\nProporzioni delle classi per DX_GROUP:")
+    print(class_proportions_DX_GROUP)
+
+
+
+def calculate_missing_percentage(df):
+    total_values = df.size
+    missing_values = df.isna().sum().sum()
+    return (missing_values / total_values) * 100
+
 
 '''This fucntion is used to compute the correlation between categorical variables using the cramers
 
@@ -103,41 +138,6 @@ def cramers_v(x, y):
     columns_corr = columns - ((columns - 1) ** 2) / (total_elements - 1)
     return np.sqrt(phi2corr / min((columns_corr - 1), (raws_corr - 1)))
 
-    
-
-
-def calculate_missing_percentage(df):
-    total_values = df.size
-    missing_values = df.isna().sum().sum()
-    return (missing_values / total_values) * 100
-
-
-def remove_high_missing(df, threshold=10):
-    current_df = df.copy()
-    
-    while calculate_missing_percentage(current_df) > threshold:
-        # Calcola la percentuale di valori mancanti per ciascuna colonna e riga
-        missing_percent_features = current_df.isna().mean() * 100
-        missing_percent_subjects = current_df.isna().mean(axis=1) * 100
-        
-        # Trova la feature o il soggetto con il più alto tasso di missing values
-        max_feature_missing = missing_percent_features.max()
-        max_subject_missing = missing_percent_subjects.max()
-        
-        # Rimuovi la feature o il soggetto con il tasso di missing values più alto
-        if max_feature_missing >= max_subject_missing:
-            feature_to_drop = missing_percent_features.idxmax()
-            current_df = current_df.drop(columns=[feature_to_drop])
-            print(f"Rimosso feature: {feature_to_drop}")
-        else:
-            subject_to_drop = missing_percent_subjects.idxmax()
-            current_df = current_df.drop(index=[subject_to_drop])
-            print(f"Rimosso soggetto: {subject_to_drop}")
-        
-        # Controllo dello stato attuale del DataFrame
-        print(f"Percentuale attuale di missing values: {calculate_missing_percentage(current_df):.2f}%")
-    
-    return current_df
 
 
 ''''This function fixs the discrepancies in the names for the same value category in an attribute
@@ -325,4 +325,59 @@ def One_hot_encoding (dataset):
 
     return dataset
 
-        
+def plot_distributions(df):
+    numeric_columns, categorical_columns, _ = select_columns(df)
+
+    # Plot delle distribuzioni per le features numeriche
+    num_plots = len(numeric_columns)
+    num_rows = (num_plots + 3) // 4
+    fig, axes = plt.subplots(num_rows, 4, figsize=(20, 5 * num_rows))
+    axes = axes.flatten()
+
+    for i, col in enumerate(numeric_columns):
+        axes[i].hist(df[col], bins=20, color='skyblue', edgecolor='black')
+        axes[i].set_title(f'Distribuzione di {col}')
+        axes[i].set_xlabel(col)
+        axes[i].set_ylabel('Frequenza')
+        axes[i].grid(True)
+
+    for i in range(num_plots, len(axes)):
+        fig.delaxes(axes[i])
+
+    plt.tight_layout()
+    plt.show()
+
+    # Plot delle distribuzioni per le features categoriche
+    num_plots = len(categorical_columns)
+    num_rows = (num_plots + 3) // 4
+    fig, axes = plt.subplots(num_rows, 4, figsize=(20, 5 * num_rows))
+    axes = axes.flatten()
+
+    for i, col in enumerate(categorical_columns):
+        df[col].value_counts().plot(kind='bar', color='skyblue', ax=axes[i])
+        axes[i].set_title(f'Distribuzione di {col}')
+        axes[i].set_xlabel(col)
+        axes[i].set_ylabel('Frequenza')
+        axes[i].grid(True)
+
+    for i in range(num_plots, len(axes)):
+        fig.delaxes(axes[i])
+
+    plt.tight_layout()
+    plt.show()
+
+
+
+
+'''
+
+# Split the dataset into train+validation and test sets
+X_train_val, X_test, y_train_val, y_test = train_test_split(ASD_phenotypic_encoded, ASD_diagnosis, test_size=0.2, random_state=42)
+
+# Split the train+validation set into train and validation sets
+X_train, X_val, y_train, y_val = train_test_split(X_train_val, y_train_val, test_size=0.25, random_state=42)
+
+print("Training set size:", X_train.shape)
+print("Validation set size:", X_val.shape)
+print("Test set size:", X_test.shape)
+  '''

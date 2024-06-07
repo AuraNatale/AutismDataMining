@@ -316,68 +316,52 @@ def normalization (dataset):
 ''' This function returns a version of the dataset where the categorical features
 where encoded to numerical using one hot encoding'''
 
-def One_hot_encoding (dataset):
-    numeric_columns, categorical_columns, dataset = select_columns(dataset)
-    categorical_column_names = categorical_columns.tolist()
-    
-    for categorical_feature in categorical_column_names:
-        dataset = pd.get_dummies(dataset, columns=[categorical_feature])
-
-    return dataset
 
 def plot_distributions(df):
     numeric_columns, categorical_columns, _ = select_columns(df)
+    
+    if numeric_columns.any():
+        # Plot delle distribuzioni per le features numeriche
+        num_plots = len(numeric_columns)
+        num_rows = (num_plots + 3) // 4
+        fig, axes = plt.subplots(num_rows, 4, figsize=(20, 5 * num_rows))
+        axes = axes.flatten()
 
-    # Plot delle distribuzioni per le features numeriche
-    num_plots = len(numeric_columns)
-    num_rows = (num_plots + 3) // 4
-    fig, axes = plt.subplots(num_rows, 4, figsize=(20, 5 * num_rows))
-    axes = axes.flatten()
+        
+        for i, col in enumerate(numeric_columns):
+            axes[i].hist(df[col], bins=20, color='skyblue', edgecolor='black')
+            axes[i].set_title(f'Distribuzione di {col}')
+            axes[i].set_xlabel(col)
+            axes[i].set_ylabel('Frequenza')
+            axes[i].grid(True)
 
-    for i, col in enumerate(numeric_columns):
-        axes[i].hist(df[col], bins=20, color='skyblue', edgecolor='black')
-        axes[i].set_title(f'Distribuzione di {col}')
-        axes[i].set_xlabel(col)
-        axes[i].set_ylabel('Frequenza')
-        axes[i].grid(True)
+        for i in range(num_plots, len(axes)):
+            fig.delaxes(axes[i])
 
-    for i in range(num_plots, len(axes)):
-        fig.delaxes(axes[i])
+        plt.tight_layout()
+        plt.show()
 
-    plt.tight_layout()
-    plt.show()
+    if categorical_columns.any():
+        # Plot delle distribuzioni per le features categoriche
+        num_plots = len(categorical_columns)
+        num_rows = (num_plots + 3) // 4
+        fig, axes = plt.subplots(num_rows, 4, figsize=(20, 5 * num_rows))
+        axes = axes.flatten()
 
-    # Plot delle distribuzioni per le features categoriche
-    num_plots = len(categorical_columns)
-    num_rows = (num_plots + 3) // 4
-    fig, axes = plt.subplots(num_rows, 4, figsize=(20, 5 * num_rows))
-    axes = axes.flatten()
+        
+        for i, col in enumerate(categorical_columns):
+            df[col].value_counts().plot(kind='bar', color='skyblue', ax=axes[i])
+            axes[i].set_title(f'Distribuzione di {col}')
+            axes[i].set_xlabel(col)
+            axes[i].set_ylabel('Frequenza')
+            axes[i].grid(True)
 
-    for i, col in enumerate(categorical_columns):
-        df[col].value_counts().plot(kind='bar', color='skyblue', ax=axes[i])
-        axes[i].set_title(f'Distribuzione di {col}')
-        axes[i].set_xlabel(col)
-        axes[i].set_ylabel('Frequenza')
-        axes[i].grid(True)
+        for i in range(num_plots, len(axes)):
+            fig.delaxes(axes[i])
 
-    for i in range(num_plots, len(axes)):
-        fig.delaxes(axes[i])
-
-    plt.tight_layout()
-    plt.show()
+        plt.tight_layout()
+        plt.show()
 
 
 
 
-'''
-
-# Split the dataset into train+validation and test sets
-X_train_val, X_test, y_train_val, y_test = train_test_split(ASD_phenotypic_encoded, ASD_diagnosis, test_size=0.2, random_state=42)
-
-# Split the train+validation set into train and validation sets
-X_train, X_val, y_train, y_val = train_test_split(X_train_val, y_train_val, test_size=0.25, random_state=42)
-
-print("Training set size:", X_train.shape)
-print("Validation set size:", X_val.shape)
-print("Test set size:", X_test.shape)
-  '''

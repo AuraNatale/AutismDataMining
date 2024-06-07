@@ -1,4 +1,5 @@
 from sklearn.model_selection import ParameterGrid
+from copy import deepcopy
 
 
 
@@ -15,44 +16,44 @@ from sklearn.model_selection import ParameterGrid
 # and the shrinked dataset
 
 def clean_dataset (c_f, c_s, balance_factor, main_dataset, side_dataset):
-    ASD_phenotypic = main_dataset.copy()
-    ASD_clinical = side_dataset.copy()
+    phenotypic = deepcopy(main_dataset)
+    clinical = deepcopy(side_dataset)
     max_nan_allowed = 0.1 #definided minimum amount of allowed missing values
 
-    num_subjects, num_features = ASD_phenotypic.shape[0],ASD_phenotypic.shape[1]
+    num_subjects, num_features = phenotypic.shape[0], phenotypic.shape[1]
 
     min_subjects = 0.25 * len(main_dataset)
     
-    feature_nan_values = ASD_phenotypic.isna().sum()
+    feature_nan_values = phenotypic.isna().sum()
     max_feature_nan_actual = feature_nan_values.max()
     perc_max_feature_nan = max_feature_nan_actual/num_subjects
 
     maintain = ['ADOS_TOTAL', 'ADI_R_VERBAL_TOTAL_BV', 'FIQ']
 
-    while perc_max_feature_nan > max_nan_allowed and len(ASD_phenotypic)> min_subjects:
+    while perc_max_feature_nan > max_nan_allowed and len(phenotypic)> min_subjects:
         
         filtered_feature_nan_values_sorted = feature_nan_values.drop(maintain)
         feature_nan_values_sorted = filtered_feature_nan_values_sorted.sort_values(ascending=True)
         to_drop = round(c_f * num_features)
         features_to_drop = feature_nan_values_sorted[num_features-to_drop:].index
-        ASD_phenotypic.drop(columns=features_to_drop, inplace=True)
+        phenotypic.drop(columns=features_to_drop, inplace=True)
             
-        num_subjects, num_features = ASD_phenotypic.shape[0],ASD_phenotypic.shape[1]
-        feature_nan_values = ASD_phenotypic.isna().sum()
+        num_subjects, num_features = phenotypic.shape[0], phenotypic.shape[1]
+        feature_nan_values = phenotypic.isna().sum()
         max_feature_nan_actual = feature_nan_values.max()
         perc_max_feature_nan = max_feature_nan_actual/num_subjects
 
-        if perc_max_feature_nan > max_nan_allowed and len(ASD_phenotypic)> min_subjects:
+        if perc_max_feature_nan > max_nan_allowed and len(phenotypic)> min_subjects:
 
-            subject_nan_values = ASD_phenotypic.T.isna().sum()
+            subject_nan_values = phenotypic.T.isna().sum()
             subject_nan_values_sorted = subject_nan_values.sort_values(ascending=False)        
             to_drop = round(c_s * num_subjects)
     
-            class_1_index = ASD_clinical[ASD_clinical['DX_GROUP'] == 1].index
-            class_2_index = ASD_clinical[ASD_clinical['DX_GROUP'] == 2].index
+            class_1_index = clinical[clinical['DX_GROUP'] == 1].index
+            class_2_index = clinical[clinical['DX_GROUP'] == 2].index
 
         
-            if (len(ASD_clinical[ASD_clinical['DX_GROUP'] == 1])/num_subjects) >= 0.6:
+            if (len(clinical[clinical['DX_GROUP'] == 1])/num_subjects) >= 0.6:
                 to_drop_class_2 = round(balance_factor * to_drop)
                 to_drop_class_1 = to_drop - to_drop_class_2
             else:
@@ -68,25 +69,25 @@ def clean_dataset (c_f, c_s, balance_factor, main_dataset, side_dataset):
             # Combine subjects to drop
             subjects_to_drop = subjects_to_drop_class_1 + subjects_to_drop_class_2
             
-            ASD_phenotypic.drop(subjects_to_drop, inplace=True)
-            ASD_clinical.drop(subjects_to_drop, inplace=True)
+            phenotypic.drop(subjects_to_drop, inplace=True)
+            clinical.drop(subjects_to_drop, inplace=True)
 
-            num_subjects, num_features = ASD_phenotypic.shape[0],ASD_phenotypic.shape[1]
-            feature_nan_values = ASD_phenotypic.isna().sum()
+            num_subjects, num_features = phenotypic.shape[0], phenotypic.shape[1]
+            feature_nan_values = phenotypic.isna().sum()
             max_feature_nan_actual = feature_nan_values.max()
             perc_max_feature_nan = max_feature_nan_actual/num_subjects
 
-    diagnostic_1 = len(ASD_clinical[ASD_clinical['DX_GROUP'] == 1])
-    diagnostic_2 = len(ASD_clinical[ASD_clinical['DX_GROUP'] == 2])
-    num_subjects, num_features = ASD_phenotypic.shape[0],ASD_phenotypic.shape[1]
-    return [[c_f, c_s, balance_factor], [num_features, num_subjects], [diagnostic_1, diagnostic_2], feature_nan_values], ASD_phenotypic, ASD_clinical
+    diagnostic_1 = len(clinical[clinical['DX_GROUP'] == 1])
+    diagnostic_2 = len(clinical[clinical['DX_GROUP'] == 2])
+    num_subjects, num_features = phenotypic.shape[0], phenotypic.shape[1]
+    return [[c_f, c_s, balance_factor], [num_features, num_subjects], [diagnostic_1, diagnostic_2], feature_nan_values], phenotypic, clinical
 
 def suitable_dataset_finder(main_dataset, side_dataset):
     param_grid = {
         'c_f': [0.025, 0.03, 0.035, 0.04, 0.045, 0.05, 0.055, 0.06, 0.065, 0.07, 0.075,
-                0.08, 0.085, 0.9, 0.095, 0.1, 0.105, 0.11, 0.115, 0.2, 0.25, 0.3],
+                0.08, 0.085, 0.09, 0.095, 0.1, 0.105, 0.11, 0.115, 0.2, 0.25, 0.3],
         'c_s': [0.01, 0.015, 0.02, 0.025, 0.03, 0.035, 0.04, 0.045, 0.05, 0.055, 0.06, 0.065, 0.07,
-                0.075,  0.08, 0.085, 0.9, 0.095, 0.1,0.105, 0.11, 0.115, 0.2, 0.25, 0.3],
+                0.075,  0.08, 0.085, 0.09, 0.095, 0.1, 0.105, 0.11, 0.115, 0.2, 0.25, 0.3],
         'bal': [0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5]
     }
 

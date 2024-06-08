@@ -5,7 +5,7 @@ from scipy.stats import chi2_contingency
 import numpy as np
 import pandas as pd
 import seaborn as sns
-from sklearn.preprocessing import MinMaxScaler
+
 
 
 '''The function select_columns(df) is useful for selecting and distinguishing
@@ -14,16 +14,16 @@ numerical features and categorical ones. In order to use it the framework is:
 numeric_columns, categorical_columns, df = select_columns(our_dataset_inuse)'''
 
 def select_columns(df):
-    # Seleziona le colonne numeriche
+    # Select numerical columns
     numeric_columns = df.select_dtypes(include=['float64', 'int64']).columns
 
-    # Seleziona tutte le colonne di tipo 'object'
+    # Select 'object' columns
     object_columns = df.select_dtypes(include=['object']).columns
 
-    # Converti le colonne selezionate in tipo 'categorical'
+    # Convert 'object' columns into 'categorical' ones
     df[object_columns] = df[object_columns].astype('category')
 
-    # Seleziona solo le colonne di tipo 'category'
+    # Select 'category' columns
     categorical_columns = df.select_dtypes(include=['category']).columns
     
     return numeric_columns, categorical_columns, df
@@ -35,13 +35,13 @@ plot_missing_values(columns_with_nan_sorted, numeric_columns)'''
 
 
 def plot_missing_values(columns_with_nan_sorted, numeric_columns, legend):
-    # Assegna colori alle colonne
-    '''Utilizza la lista numeric_columns per determinare se una colonna è numerica
-    o meno, e assegna il colore blu alle colonne numeriche e arancione alle colonne
-    non numeriche.'''
+    # Give colors to columns
+    '''Use numeric_columns list to determine if a column is numerical or not, so assign the 
+     color blue to numerical and orange to not numerical columns'''
+    
     colors = ['blue' if col in numeric_columns else 'orange' for col in columns_with_nan_sorted.index]
 
-    # Plot delle colonne con valori mancanti
+    # Plot columns with missing values 
     plt.figure(figsize=(12, 16))
     columns_with_nan_sorted.plot(kind='barh', color=colors)
     plt.title('Features with Missing Values')
@@ -50,81 +50,51 @@ def plot_missing_values(columns_with_nan_sorted, numeric_columns, legend):
     plt.xticks(range(0, 110, 10))
 
 
-    # Aggiungi legenda
+    # Add Legend
     
     blue_patch = mpatches.Patch(color='blue', label='Numeric Columns')
     orange_patch = mpatches.Patch(color='orange', label='Categorical Columns')
     plt.legend(handles=[blue_patch, orange_patch])
 
-     # Se la legenda non è richiesta, non mostrare la legenda
+     # If the legend is useless, don't show it
     if not legend:
         plt.legend().remove()
 
-    
-
-'''stavolta riferito al numero di valori presenti
-Utilizzo della funzione
-plot_features_by_presence(columns_by_presence, numeric_columns)'''
-'''
-def plot_features_by_presence(columns_by_presence, numeric_columns, legend):
-    # Assegna colori alle colonne
-    colors = ['blue' if col in numeric_columns else 'orange' for col in columns_by_presence.index]
-
-    # Plot delle colonne con valori presenti
-    plt.figure(figsize=(12, 16))
-    columns_by_presence.plot(kind='barh', color=colors)
-    plt.title('Features with Present Values')
-    plt.xlabel('Number of Present Values')
-    plt.ylabel('Features')
-
-    # Aggiungi legenda
-    
-    blue_patch = mpatches.Patch(color='blue', label='Numeric Columns')
-    orange_patch = mpatches.Patch(color='orange', label='Categorical Columns')
-    plt.legend(handles=[blue_patch, orange_patch])
-
-    # Se la legenda non è richiesta, non mostrare la legenda
-    if not legend:
-        plt.legend().remove()
-
-    '''
 
 
-# Funzione per calcolare il conteggio delle classi per DX_GROUP
+# Function in order to evaluate balancing
 def evaluate_balancing(df):
     class_counts_DX_GROUP = df['DX_GROUP'].value_counts()
 
 
-    # Stampa il conteggio delle classi per DX_GROUP
-    print("Conteggio delle classi per DX_GROUP:")
+    # Print class count
+    print("Class count DX_GROUP:")
     print(class_counts_DX_GROUP)
 
-    # Visualizza la distribuzione delle classi per DX_GROUP
+    # Visual distribution of classes DX_GROUP
     class_counts_DX_GROUP.plot(kind='bar', color='blue')
-    plt.title('Distribuzione delle classi per DX_GROUP')
-    plt.xlabel('Classe')
-    plt.ylabel('Numero di campioni')
+    plt.title('DX_GROUP class distribution')
+    plt.xlabel('Class')
+    plt.ylabel('Number of samples')
     plt.xticks(rotation=0)
     plt.show()
 
-    # Calcola le proporzioni delle classi per DX_GROUP
+    # Proportion count of classes DX_GROUP
     class_proportions_DX_GROUP = df['DX_GROUP'].value_counts(normalize=True)
 
-    # Stampa le proporzioni delle classi per DX_GROUP
-    print("\nProporzioni delle classi per DX_GROUP:")
+    # Print proportion
+    print("\nClass Proportion DX_GROUP:")
     print(class_proportions_DX_GROUP)
 
 
-
+# Function to evaluate the percentage of missing values
 def calculate_missing_percentage(df):
     total_values = df.size
     missing_values = df.isna().sum().sum()
     return (missing_values / total_values) * 100
 
 
-'''This fucntion is used to compute the correlation between categorical variables using the cramers
-
-extracted from chatgpt ujuju '''
+#Function to compute the correlation between categorical variables using the cramers
 
 def cramers_v(x, y):
     """Compute Cramer's V statistic for categorical-categorical association."""
@@ -140,7 +110,7 @@ def cramers_v(x, y):
 
 
 
-''''This function fixs the discrepancies in the names for the same value category in an attribute
+''''This function fixes the discrepancies in the names for the same value category in an attribute
 Receives a dataset as an input and return the same dataset after having solved the discrepancies'''
 
 def discrepancies_fixer (dataset):
@@ -291,37 +261,13 @@ def inpute_missing_values (dataset, dataset_original):
 
     return dataset
 
-
-''' This function normalizes to a range [0-1] the numerical features'''
-def normalization (dataset):
-    numeric_columns = dataset.select_dtypes(include=['float64', 'int64']).columns
-    numeric_columns_names = numeric_columns.tolist()
-
-    for column in numeric_columns_names:
-        min = dataset[column].min()
-        max = dataset[column].max()
-
-        for i in dataset.index:
-            current_value = dataset[column][i]
-            dataset.loc[i, column] = (current_value - min) / (max - min)
-
-    return dataset
-
-
-# Example usage
-# dataset = pd.read_csv('your_dataset.csv')
-# normalized_dataset = normalization(dataset)
-
-
-''' This function returns a version of the dataset where the categorical features
-where encoded to numerical using one hot encoding'''
-
+#Function to plot disrtibution using histogram plot (numerical feature) and bar chart (categorical ones)
 
 def plot_distributions(df):
     numeric_columns, categorical_columns, _ = select_columns(df)
     
     if numeric_columns.any():
-        # Plot delle distribuzioni per le features numeriche
+        # Plot distribution numerical features 
         num_plots = len(numeric_columns)
         num_rows = (num_plots + 3) // 4
         fig, axes = plt.subplots(num_rows, 4, figsize=(20, 5 * num_rows))
@@ -342,7 +288,7 @@ def plot_distributions(df):
         plt.show()
 
     if categorical_columns.any():
-        # Plot delle distribuzioni per le features categoriche
+        # Plot distribution categorical features 
         num_plots = len(categorical_columns)
         num_rows = (num_plots + 3) // 4
         fig, axes = plt.subplots(num_rows, 4, figsize=(20, 5 * num_rows))

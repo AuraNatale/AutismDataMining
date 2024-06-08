@@ -18,23 +18,26 @@ from copy import deepcopy
 def clean_dataset (c_f, c_s, balance_factor, main_dataset, side_dataset):
     phenotypic = deepcopy(main_dataset)
     clinical = deepcopy(side_dataset)
-    max_nan_allowed = 0.1 #definided minimum amount of allowed missing values
+    max_nan_allowed = 0.2 #definided minimum amount of allowed missing values
 
     num_subjects, num_features = phenotypic.shape[0], phenotypic.shape[1]
 
-    min_subjects = 0.25 * len(main_dataset)
+    min_subjects = 0.25 * len(phenotypic)
     
     feature_nan_values = phenotypic.isna().sum()
     max_feature_nan_actual = feature_nan_values.max()
     perc_max_feature_nan = max_feature_nan_actual/num_subjects
 
     maintain = ['ADOS_TOTAL', 'ADI_R_VERBAL_TOTAL_BV', 'FIQ']
+    
 
     while perc_max_feature_nan > max_nan_allowed and len(phenotypic)> min_subjects:
         
-        filtered_feature_nan_values_sorted = feature_nan_values.drop(maintain)
-        feature_nan_values_sorted = filtered_feature_nan_values_sorted.sort_values(ascending=True)
+        feature_nan_values = feature_nan_values.drop(maintain)
+        feature_nan_values_sorted = feature_nan_values.sort_values(ascending=True)
         to_drop = round(c_f * num_features)
+        if to_drop < 1:
+            to_drop = 1
         features_to_drop = feature_nan_values_sorted[num_features-to_drop:].index
         phenotypic.drop(columns=features_to_drop, inplace=True)
             
@@ -48,6 +51,8 @@ def clean_dataset (c_f, c_s, balance_factor, main_dataset, side_dataset):
             subject_nan_values = phenotypic.T.isna().sum()
             subject_nan_values_sorted = subject_nan_values.sort_values(ascending=False)        
             to_drop = round(c_s * num_subjects)
+            if to_drop < 1:
+                to_drop = 1
     
             class_1_index = clinical[clinical['DX_GROUP'] == 1].index
             class_2_index = clinical[clinical['DX_GROUP'] == 2].index

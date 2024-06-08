@@ -15,10 +15,10 @@ from copy import deepcopy
 # [2] - selected features with nan values
 # and the shrinked dataset
 
-def clean_dataset (c_f, c_s, balance_factor, main_dataset, side_dataset):
+def clean_dataset (c_f, c_s, balance_factor, thr, main_dataset, side_dataset):
     phenotypic = deepcopy(main_dataset)
     clinical = deepcopy(side_dataset)
-    max_nan_allowed = 0.2 #definided minimum amount of allowed missing values
+    max_nan_allowed = 0.3 #definided minimum amount of allowed missing values
 
     num_subjects, num_features = phenotypic.shape[0], phenotypic.shape[1]
 
@@ -29,7 +29,6 @@ def clean_dataset (c_f, c_s, balance_factor, main_dataset, side_dataset):
     perc_max_feature_nan = max_feature_nan_actual/num_subjects
 
     maintain = ['ADOS_TOTAL', 'ADI_R_VERBAL_TOTAL_BV', 'FIQ']
-    
 
     while perc_max_feature_nan > max_nan_allowed and len(phenotypic)> min_subjects:
         
@@ -58,7 +57,7 @@ def clean_dataset (c_f, c_s, balance_factor, main_dataset, side_dataset):
             class_2_index = clinical[clinical['DX_GROUP'] == 2].index
 
         
-            if (len(clinical[clinical['DX_GROUP'] == 1])/num_subjects) >= 0.6:
+            if (len(clinical[clinical['DX_GROUP'] == 1])/num_subjects) >= thr:
                 to_drop_class_2 = round(balance_factor * to_drop)
                 to_drop_class_1 = to_drop - to_drop_class_2
             else:
@@ -84,22 +83,23 @@ def clean_dataset (c_f, c_s, balance_factor, main_dataset, side_dataset):
 
     diagnostic_1 = len(clinical[clinical['DX_GROUP'] == 1])
     diagnostic_2 = len(clinical[clinical['DX_GROUP'] == 2])
+    balance_perc = diagnostic_1/ num_subjects
     num_subjects, num_features = phenotypic.shape[0], phenotypic.shape[1]
-    return [[c_f, c_s, balance_factor], [num_features, num_subjects], [diagnostic_1, diagnostic_2], feature_nan_values], phenotypic, clinical
+    return [[c_f, c_s, balance_factor, thr], [num_features, num_subjects], [diagnostic_1, diagnostic_2, balance_perc], feature_nan_values], phenotypic, clinical
 
 def suitable_dataset_finder(main_dataset, side_dataset):
+    
     param_grid = {
-        'c_f': [0.025, 0.03, 0.035, 0.04, 0.045, 0.05, 0.055, 0.06, 0.065, 0.07, 0.075,
-                0.08, 0.085, 0.09, 0.095, 0.1, 0.105, 0.11, 0.115, 0.2, 0.25, 0.3],
-        'c_s': [0.01, 0.015, 0.02, 0.025, 0.03, 0.035, 0.04, 0.045, 0.05, 0.055, 0.06, 0.065, 0.07,
-                0.075,  0.08, 0.085, 0.09, 0.095, 0.1, 0.105, 0.11, 0.115, 0.2, 0.25, 0.3],
-        'bal': [0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5]
+        'c_f': [0.15,  0.2, 0.25, 0.3, 0.35, 0.4],
+        'c_s': [0.15, 0.2, 0.25, 0.3, 0.35, 0.4],
+        'bal': [0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4],
+        'thr': [0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9]
     }
 
 
     '''To optimize the function in order to find the best solution we need to search for different values
     of the parameters c_f and c_s. In order to do that, we will perform a grid search. 
-    In this way we try 22 values for c_f and 24 values for c_s and all of the combination between them.
+    In this way we try 6 values for c_f, 6 values for c_s and all of the combination between them.
 
     In order to save space, we decide to store only the results that ensure to conserve at least
     1/5 of the total amount of subjects (or 200) and that gives a variety of at least more than 6 features.'''
@@ -115,8 +115,9 @@ def suitable_dataset_finder(main_dataset, side_dataset):
         c_f = params.get('c_f')
         c_s = params.get('c_s')
         bal = params.get('bal')
+        thr = params.get('thr')
 
-        outcome, main_data_cleaned, side_data_cleaned = clean_dataset (c_f, c_s, bal, main_dataset, side_dataset)
+        outcome, main_data_cleaned, side_data_cleaned = clean_dataset (c_f, c_s, bal, thr, main_dataset, side_dataset)
         
 
         condition_1 = (outcome[1][1] >= 200) #num subjects
@@ -130,29 +131,15 @@ def suitable_dataset_finder(main_dataset, side_dataset):
         condition_3 = perc_max_feature_nan <= 0.30
 
         if condition_3 and condition_2 and condition_1:
-            print("store!")
             stored_outcomes.append(outcome)
 
-    '''In order to choose one of them, we decide to maintain the one that maintain
-    better differenciation between the two classes of the diagnostic.'''
+    if not stored_outcomes:
+        return "No suitable datasets found."
 
-    #Find ten best results
-    #return [[c_f, c_s, balance_factor], [num_features, num_subjects], [diagnostic_1, diagnostic_2], feature_nan_values]
-    best_results = [[1000,0,0,0], [1000,0,0,0], [10000,0,0,0], [1000,0,0,0], [1000,0,0,0], [10000,0,0,0], [1000,0,0,0],
-                    [1000,0,0,0], [10000,0,0,0], [10000,0,0,0]]
+    best_results = sorted(stored_outcomes, key=lambda x: x[2][2])
 
-    for i in range (len(stored_outcomes)):
-        class_counts = stored_outcomes[i][2]
-        balance = class_counts[0]-class_counts[1]
-        differences_score = []
-        for j in range (len(best_results)):
-            difference = balance - best_results[j][0]
-            differences_score.append(difference)
-        min_value = min(differences_score)
-        if min_value < 0:
-            index_max = differences_score.index(min_value)
-            best_results[index_max] = [class_counts[0]/stored_outcomes[i][1][1], stored_outcomes[i][0], stored_outcomes[i][1], stored_outcomes[i][3]]
-
-    sorted_best_results = sorted(best_results, key=lambda x: x[0])
-    for result in sorted_best_results:
+    for result in best_results[0:10]:  # print the best 10 results
+        print("With balance: " + str(result[2][2]))
         print(result)
+
+    return best_results

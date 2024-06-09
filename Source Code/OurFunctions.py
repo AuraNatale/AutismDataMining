@@ -33,6 +33,15 @@ categorical and numerical, according to the number of missing values. In order t
 
 plot_missing_values(columns_with_nan_sorted, numeric_columns)'''
 
+#function to count missing values
+def count_missing_value(df):
+    
+    nan_values = df.isna().sum() 
+    nan_sorted = nan_values.sort_values(ascending=False)
+
+    total_rows = df.shape[0]
+    percent_missing = (nan_sorted / total_rows) * 100
+    return df, percent_missing
 
 def plot_missing_values(columns_with_nan_sorted, numeric_columns, legend):
     # Give colors to columns

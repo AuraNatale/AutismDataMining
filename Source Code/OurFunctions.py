@@ -326,10 +326,10 @@ def evaluation_test_scores(y_test, y_pred):
     recall = recall_score(y_test, y_pred)
     f1 = f1_score(y_test, y_pred)
 
-    print("\nValutazione del modello sui dati di test:")
-    print(f"Accuratezza: {accuracy:.3f}")
-    print(f"Precisione: {precision:.3f}")
-    print(f"Richiamo: {recall:.3f}")
+    print("\nModel Evaluation on Test Data:")
+    print(f"Accuracy: {accuracy:.3f}")
+    print(f"Precision: {precision:.3f}")
+    print(f"Recall: {recall:.3f}")
     print(f"F1-score: {f1:.3f}")
 
     return accuracy, precision, recall, f1

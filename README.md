@@ -12,7 +12,7 @@ The ABIDE Dataset is a collaborative dataset, multi-sites, containing several ki
 This project has been focused on Phenotypic characteristics dealing with the fondamental issue mentioned above.
 
 The ABIDE Dataset has been validated in several papers.
-Our reference and starting poin is available here:
+Our reference and starting point is available here:
 https://pubmed.ncbi.nlm.nih.gov/30393630/
 
 

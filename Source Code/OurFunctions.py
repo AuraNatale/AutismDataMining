@@ -5,10 +5,12 @@ from scipy.stats import chi2_contingency
 import numpy as np
 import pandas as pd
 import seaborn as sns
+import random
 
 from sklearn.metrics import roc_curve, roc_auc_score, accuracy_score, make_scorer, precision_score, recall_score, f1_score, confusion_matrix
 
 np.random.seed(42)
+random.seed(42)
 
 '''The function select_columns(df) is useful for selecting and distinguishing
 numerical features and categorical ones. In order to use it the framework is:

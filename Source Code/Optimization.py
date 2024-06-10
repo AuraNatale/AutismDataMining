@@ -14,8 +14,10 @@ import seaborn as sns #Visualization
 import missingno as msno
 from sklearn.preprocessing import RobustScaler #scikit-learn -> ML
 import OurFunctions as of #saperated collection
+import random
 
 np.random.seed(42)
+random.seed(42)
 
 def remove_high_missing(df, key_features, balance_column, min_subjects=200, max_missing_percentage=10):
     current_df = df.copy()

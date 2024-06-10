@@ -334,3 +334,24 @@ def evaluation_test_scores(y_test, y_pred):
 
     return accuracy, precision, recall, f1
 
+# Function to evaluate the AUC-ROC for a given model based on the predicted probabilities
+def evaluate_roc_auc(model, X_test, y_test):
+    y_proba = model.predict_proba(X_test)[:, 1]
+    auc_roc = roc_auc_score(y_test, y_proba)
+    return auc_roc
+
+
+# Print the results
+print("K-Nearest Neighbors Classifier AUC-ROC:", knn_auc_roc)
+print("Random Forest Classifier AUC-ROC:", rf_auc_roc)
+print("Support vector Classifier AUC-ROC:", svc_auc_roc)
+
+def plot_roc_curve(model, X_test, y_test, model_name):
+    y_proba = model.predict_proba(X_test)[:, 1]
+    fpr, tpr, _ = roc_curve(y_test, y_proba)
+    plt.plot(fpr, tpr, label=model_name)
+    plt.xlabel('False Positive Rate')
+    plt.ylabel('True Positive Rate')
+    plt.title('ROC Curve')
+    plt.legend()
+    plt.grid(True)

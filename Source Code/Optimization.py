@@ -68,6 +68,7 @@ def remove_high_missing(df, key_features, balance_column, min_subjects=200, max_
 
 
 def optimization_rules(df_vercleaned,features_to_check,desired_missing_percentage):
+    np.random.seed(42)
 
     # Copia il DataFrame ASD_phenotypic_cleaned
     cleaned_df = df_vercleaned.copy()
@@ -86,7 +87,8 @@ def optimization_rules(df_vercleaned,features_to_check,desired_missing_percentag
         # Se non ci sono più soggetti non autistici con valori mancanti, esci dal ciclo
         if non_autistic_missing.empty:
             break
-
+        
+        
         # Seleziona un soggetto non autistico con valori mancanti in modo casuale
         subject_to_remove = np.random.choice(non_autistic_missing.index)
 
@@ -97,5 +99,4 @@ def optimization_rules(df_vercleaned,features_to_check,desired_missing_percentag
     # Verifica il DataFrame aggiornato
     print(cleaned_df)
     return cleaned_df
-
 

@@ -6,6 +6,7 @@ import numpy as np
 import pandas as pd
 import seaborn as sns
 
+from sklearn.metrics import roc_curve, roc_auc_score, accuracy_score, make_scorer, precision_score, recall_score, f1_score, confusion_matrix
 
 
 '''The function select_columns(df) is useful for selecting and distinguishing
@@ -318,5 +319,18 @@ def plot_distributions(df):
         plt.show()
 
 
+def evaluation_test_scores(y_test, y_pred):
+    # Metrics evaluation on Test Data
+    accuracy = accuracy_score(y_test, y_pred)
+    precision = precision_score(y_test, y_pred)
+    recall = recall_score(y_test, y_pred)
+    f1 = f1_score(y_test, y_pred)
 
+    print("\nValutazione del modello sui dati di test:")
+    print(f"Accuratezza: {accuracy:.3f}")
+    print(f"Precisione: {precision:.3f}")
+    print(f"Richiamo: {recall:.3f}")
+    print(f"F1-score: {f1:.3f}")
+
+    return accuracy, precision, recall, f1
 

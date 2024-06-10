@@ -341,11 +341,6 @@ def evaluate_roc_auc(model, X_test, y_test):
     return auc_roc
 
 
-# Print the results
-print("K-Nearest Neighbors Classifier AUC-ROC:", knn_auc_roc)
-print("Random Forest Classifier AUC-ROC:", rf_auc_roc)
-print("Support vector Classifier AUC-ROC:", svc_auc_roc)
-
 def plot_roc_curve(model, X_test, y_test, model_name):
     y_proba = model.predict_proba(X_test)[:, 1]
     fpr, tpr, _ = roc_curve(y_test, y_proba)

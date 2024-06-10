@@ -3,7 +3,7 @@
 Welcome to our DataMining project!
 
 Nowadays the Autism Spectrum Disorder is an hot topic in research.
-The fondamental issue to be assessed is the absence of a Gold Standard methodology for diagnosis evaluation: based on clinical interviews and behavioral assessments.
+The fundamental issue to be assessed is the absence of a Gold Standard methodology for diagnosis evaluation: based on clinical interviews and behavioral assessments.
 
 In order to improve knowledge and discover rules behind ASD, ABIDE Dataset has been borned.
 

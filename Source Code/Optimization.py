@@ -12,10 +12,10 @@ import pandas as pd #Database Technology <-> Data preproc & Data Analysis
 from matplotlib import pyplot as plt #Visualization
 import seaborn as sns #Visualization
 import missingno as msno
-import random 
 from sklearn.preprocessing import RobustScaler #scikit-learn -> ML
 import OurFunctions as of #saperated collection
 
+np.random.seed(42)
 
 def remove_high_missing(df, key_features, balance_column, min_subjects=200, max_missing_percentage=10):
     current_df = df.copy()
@@ -68,7 +68,7 @@ def remove_high_missing(df, key_features, balance_column, min_subjects=200, max_
 
 
 def optimization_rules(df_vercleaned,features_to_check,desired_missing_percentage):
-    np.random.seed(42)
+    
 
     # Copia il DataFrame ASD_phenotypic_cleaned
     cleaned_df = df_vercleaned.copy()
